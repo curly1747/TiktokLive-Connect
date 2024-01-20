@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% import 'macro.html' as macros %}
+
+{% block custom_js %}
+    <script type="module" src="/static/js/pk_embed.js"></script>
+{% endblock %}
+
+{% block custom_css %}
+    <style>
+        #body_class {
+            background-color: unset !important;
+        }
+
+        .shim-blue {
+            position: relative;
+            overflow: hidden;
+            background-color: rgba(55, 90, 177, 0.7);
+        }
+
+        .shim-blue::after {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            transform: translateX(100%);
+            background-image: linear-gradient(
+                    90deg,
+                    rgba(55, 90, 177, 1) 0,
+                    rgb(71, 118, 234, 1) 50%,
+                    rgb(109, 149, 248, 1) 100%
+            );
+            animation: shimmer 1.5s ease-in-out infinite;
+            content: "";
+        }
+
+        .stop_animation::after {
+            animation: none !important;
+        }
+
+        .shim-red {
+            position: relative;
+            overflow: hidden;
+            background-color: rgba(240, 18, 86, 1);
+        }
+
+        .shim-red::after {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            transform: translateX(-100%);
+            background-image: linear-gradient(
+                    90deg,
+                    rgba(240, 18, 86, 1) 0,
+                    rgba(244, 59, 122, 1) 50%,
+                    rgba(247, 83, 142, 1) 100%
+            );
+            animation: shimmer 1.5s ease-in-out infinite;
+            content: "";
+        }
+
+        @keyframes shimmer {
+            100% {
+                transform: translateX(0%);
+                opacity: 0;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block title %}
+    Profile
+{% endblock %}
+
+{% block content %}
+    <div id="page-content"
+         class="transition-all ease-in-out duration-200 flex flex-col min-h-screen items-center align-center p-8 space-y-8">
+        <div class="flex flex-col w-full justify-center align-center items-center hidden" id="pk">
+            <div class="flex justify-between w-1/2 text-slate-300 text-xl font-bold">
+                <div class="flex justify-between w-full relative">
+                    <span id="name_a" class="flex items-center align-center" style="color: rgba(247, 83, 142, 1)">
+                        {{ pk_config['a']['name'] }}
+                        <span class="raw ml-2 badge bg-success-500 text-success-500 bg-opacity-30 capitalize font-bold {{ ' hidden' if is_pk else ('hidden' if pk_config['a_point'] != pk_config['b_point'])  }}">HÒA</span>
+                        <span class="win ml-2 badge bg-success-500 text-success-500 bg-opacity-30 capitalize font-bold {{ ' hidden' if is_pk else ('hidden' if pk_config['a_point'] <= pk_config['b_point'])  }}">CHIẾN THẮNG</span>
+                        <span class="lose ml-2 badge bg-warning-500 text-warning-500 bg-opacity-30 capitalize font-bold {{ ' hidden' if is_pk else ('hidden' if pk_config['a_point'] >= pk_config['b_point'])  }}">THẤT BẠI</span>
+                    </span>
+                    <span id="name_b" class="flex items-center align-center" style="color: rgba(78, 128, 253, 1)">
+                        <span class="raw mr-2 badge bg-success-500 text-success-500 bg-opacity-30 capitalize font-bold {{ ' hidden' if is_pk else ('hidden' if pk_config['b_point'] != pk_config['a_point']) }}">HÒA</span>
+                        <span class="win mr-2 badge bg-success-500 text-success-500 bg-opacity-30 capitalize font-bold {{ ' hidden' if is_pk else ('hidden' if pk_config['b_point'] <= pk_config['a_point']) }}">CHIẾN THẮNG</span>
+                        <span class="lose mr-2 badge bg-warning-500 text-warning-500 bg-opacity-30 capitalize font-bold {{ ' hidden' if is_pk else ('hidden' if pk_config['b_point'] >= pk_config['a_point']) }}">THẤT BẠI</span>
+                        {{ pk_config['b']['name'] }}
+                    </span>
+                    <div class="absolute w-full flex justify-center">{{ pk_config['name'] }}</div>
+                </div>
+
+            </div>
+            <div class="relative pt-1 w-1/2 mt-2">
+                <div class="absolute z-10 w-full h-10 flex justify-between align-center items-center text-white text-xl font-bold p-4">
+                    <span id="point_a">0</span>
+                    <span id="point_b">0</span>
+                </div>
+                <div class="flex w-full h-10 shim-blue stop_animation rounded-full" id="bar">
+                    <div style="width: 50%" id="bar_a" data-point="#point_a" data-init-point="{{ pk_config['a_point'] }}"
+                         class="transition-all h-full duration-300 ease-in-out shadow-none flex text-center whitespace-nowrap text-white justify-end align-center items-center shim-red">
+                    </div>
+                    <div class="bg-white w-1 h-full"></div>
+                    <div style="width: 50%" id="bar_b" data-point="#point_b" data-init-point={{ pk_config['b_point'] }}
+                         class="w-full overflow-hidden h-full mb-4 text-xs flex rounded shim-blue justify-start align-center items-center">
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-between w-1/2 text-slate-300 text-xl font-bold">
+                <div class="flex justify-between relative w-full relative">
+                    <div id="gift_a" class="flex gap-2 mt-3">
+                        {% for src in pk_config['a']['thumbnails'] %}
+                        <img class="h-10" src="{{ src }}">
+                        {% endfor %}
+                    </div>
+                    <div id="gift_b" class="flex gap-1 mt-3">
+                        {% for src in pk_config['b']['thumbnails'] %}
+                        <img class="h-10" src="{{ src }}">
+                        {% endfor %}
+                    </div>
+                    <div class="absolute flex justify-center w-full">
+                        <div class="px-4 py-2 min-w-52 text-xl text-slate-300 bg-slate-950 flex gap-2 items-center justify-center rounded-b-xl overflow-hidden" style="clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%);">
+                            <img src="/static/images/vs.png" class="h-6">
+                            <div class="flex">
+                                <span id="remain_time" class="min-w-10 flex justify-end">{{ 'Kết Thúc' if not remain_time else remain_time }}</span>
+                                <span id="remain_time_label" class="{{ 'hidden' if not remain_time}}">s</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

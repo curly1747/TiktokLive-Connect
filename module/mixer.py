@@ -31,10 +31,10 @@ class Controller(Thread):
         self.mixer.emit('speed', self.queue_redis["speed"])
         is_valid = False
         if "FAST" in speed['types']:
-            self.mixer.set_speed(1.5)
+            self.mixer.set_speed(1.0 + 1.0*speed['count'])
             is_valid = True
         elif "SLOW" in speed['types']:
-            self.mixer.set_speed(0.5)
+            self.mixer.set_speed(0.5*speed['count'])
             is_valid = True
         if is_valid:
             time.sleep(15)
@@ -82,9 +82,11 @@ class Mixer(Thread):
     def set_speed(self, rate):
         self.channel_gift_music.set_rate(rate)
 
-    def add_speed(self, gift: GiftConfig):
+    def add_speed(self, gift: GiftConfig, count):
         current_queue = self.queue_redis['speed']
-        current_queue.append(gift.dict())
+        gift_dict = gift.dict()
+        gift_dict['count'] = count
+        current_queue.append(gift_dict)
         self.queue_redis['speed'] = current_queue
         log.info(f'Thêm {"FAST" if "FAST" in gift.types else "SLOW"}, vị trí {len(self.queue_redis["queue"])}')
 
@@ -131,6 +133,7 @@ class Mixer(Thread):
     def reset_all(self):
         count = len(self.queue_redis['queue'])
         self.queue_redis['queue'] = list()
+        self.queue_redis['speed'] = list()
         log.info(f'Loại toàn bộ danh sách phát ({count} bài)')
 
     def next(self) -> dict:

@@ -170,6 +170,11 @@ $(document).ready(function () {
         socket.emit('update_app_setting', data);
     });
 
+    $('#reset_queue').click(function () {
+        socket.emit('reset_queue', '');
+        $('#queue').html('')
+    });
+
     $('#connect').click(function () {
         $(this).find('.flex').find('span').html('Đang kết nối...')
         $(this).prop('disabled', true)

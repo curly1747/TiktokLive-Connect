@@ -16,7 +16,7 @@ $(document).ready(function () {
 
     function render_queue(event) {
         return `
-            <div class="bg-slate-800 hover:bg-slate-700 shadow rounded-2xl p-5 cursor-pointer gift-item basis-1/2">
+            <div class="bg-slate-800 hover:bg-slate-700 shadow rounded-2xl p-5 cursor-pointer gift-item w-full">
                 <div class="flex items-center gap-6 ">
                     <img src="${event.ava}"
                          alt="" class="h-16 rounded-full">
@@ -35,7 +35,7 @@ $(document).ready(function () {
 
     function check_queue(data) {
         let html = `
-            <div class="flex flex-col basis-1/2 gap-2">
+            <div class="flex flex-col w-full gap-2">
                 <div class="flex justify-between text-slate-300 text-base font-bold px-2">
                     <span>Danh sách phát</span>
                     <span>(${data.length})</span>

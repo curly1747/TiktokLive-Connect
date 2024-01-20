@@ -125,6 +125,7 @@ def pk_embed():
                            profiles=available_profile(), connected=connected,
                            pause=not app.mixer.pause)
 
+
 @app.route("/pk")
 def pk():
     global gift_config_redis, config_redis, pk_redis
@@ -206,6 +207,13 @@ def delete_profile(name):
     os.remove(file_path)
 
     emit('delete_profile', {'success': True, 'msg': f'{name}', 'location': f'/profile'})
+
+
+@socketio.on('reset_queue')
+def reset_queue(name):
+    app.mixer.reset_all()
+    emit('queue', app.mixer.queue_redis["queue"])
+    emit('speed', app.mixer.queue_redis["speed"])
 
 
 @socketio.on('set_default_profile')
@@ -596,7 +604,8 @@ class Webapp(Thread):
 
     @staticmethod
     def start_sever(**server_kwargs):
-        server_kwargs["flask_socketio"].run(server_kwargs["app"], port=server_kwargs["port"], allow_unsafe_werkzeug=True)
+        server_kwargs["flask_socketio"].run(server_kwargs["app"], port=server_kwargs["port"],
+                                            allow_unsafe_werkzeug=True)
 
     def run(self):
         import logging

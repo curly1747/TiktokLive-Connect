@@ -119,8 +119,8 @@ class TikTokDance:
                 self.mixer.reset()
             if "RESET" in gift.types:
                 self.mixer.reset_all()
-            if "FAST" in gift.types or "SLOW" in gift.types:
-                self.mixer.add_speed(gift)
+        if "FAST" in gift.types or "SLOW" in gift.types:
+            self.mixer.add_speed(gift, count)
 
         self.mixer.emit('queue', self.mixer.queue_redis["queue"])
         self.mixer.emit('speed', self.mixer.queue_redis["speed"])
@@ -149,22 +149,23 @@ class TikTokDance:
 
     def on_gift(self, event: GiftEvent):
         if self.pk_mode:
-            self.on_pk_gift(event)
+            if not event.gift.repeat_end:
+                self.on_pk_gift(event)
             return
 
         count = 0
         if self.config['queue_type'] == "GIFT":
             if not event.gift.repeat_end:
+                count = 1
                 log.debug(f'User {event.user.nickname} sent {event.gift.info.name}. {event.gift}')
                 for gift in self.gifts:
                     if event.gift.id == gift.id:
-                        count = 1
                         gift = copy.deepcopy(gift)
                         gift.user = event.user
                         break
         else:
             if event.gift.repeat_end:
-                log.debug(f'User {event.user.nickname} sent {count}x {event.gift.info.name}. {event.gift}')
+                log.debug(f'User {event.user.nickname} sent {event.gift.count}x {event.gift.info.name}. {event.gift}')
                 for gift in self.gifts:
                     if event.gift.id == gift.id:
                         count = event.gift.count
@@ -181,8 +182,8 @@ class TikTokDance:
                 self.mixer.reset()
             if "RESET" in gift.types:
                 self.mixer.reset_all()
-            if "FAST" in gift.types or "SLOW" in gift.types:
-                self.mixer.add_speed(gift)
+        if "FAST" in gift.types or "SLOW" in gift.types:
+            self.mixer.add_speed(gift, count)
 
         if count:
             self.mixer.emit('queue', self.mixer.queue_redis["queue"])

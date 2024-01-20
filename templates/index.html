@@ -31,47 +31,57 @@
             </div>
 
         {% else %}
-        <div class="flex gap-4 w-full justify-center items-center align-center">
-            <button class="btn inline-flex justify-center btn-{{ 'danger' if not connected else 'success' }} basis-1/5"
-                    id="connect">
-                <span class="flex items-center">
-                    <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="ph:plugs-connected-bold"></iconify-icon>
-                    <span>{{ 'Kết nối' if not connected else config['room_id'] }}</span>
-                </span>
-            </button>
-            <button class="btn inline-flex justify-center btn-light basis-1/5 space-x-4" id="pause" data-state="{{ pause }}" {{ 'disabled' if not connected and not pause }}>
-                <span class="flex items-center pause {{ 'hidden' if not pause }}">
-                    <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="solar:pause-bold"></iconify-icon>
-                    <span>Tạm Dừng</span>
-                </span>
-                <span class="flex items-center resume {{ 'hidden' if pause }}">
-                    <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2"
-                                  icon="material-symbols:resume-rounded"></iconify-icon>
-                    <span>Phát nhạc</span>
-                </span>
-            </button>
-            <a href="/profile{{ ('/' + profile) if profile }}" class="p-0 m-0 basis-1/5 space-x-4">
-                <button class="btn inline-flex justify-center btn-{{ 'primary' if profile else 'danger' }} w-full set_default_profile">
+        <div class="flex flex-col gap-4 w-full justify-center items-center align-center">
+            <div class="flex gap-4 w-full justify-center items-center align-center">
+                <button class="btn inline-flex justify-center btn-{{ 'danger' if not connected else 'success' }} basis-1/5"
+                        id="connect">
                     <span class="flex items-center">
-                        <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2"
-                                      icon="f7:person-crop-circle-fill-badge-checkmark"></iconify-icon>
-                        <span>{{ profile if profile else 'Chưa chọn profile' }}</span>
+                        <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="ph:plugs-connected-bold"></iconify-icon>
+                        <span>{{ 'Kết nối' if not connected else config['room_id'] }}</span>
                     </span>
                 </button>
-            </a>
-            <button class="btn inline-flex justify-center btn-light basis-1/5 space-x-4" data-bs-toggle="modal"
-                    data-bs-target="#app_setting" data-profile="{{ profile }}">
-                <span class="flex items-center">
-                    <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="ant-design:setting-filled"></iconify-icon>
-                    <span>Cài Đặt</span>
-                </span>
-            </button>
-            <button class="btn inline-flex justify-center btn-light basis-1/5 space-x-4" data-bs-toggle="offcanvas" data-bs-target="#add_music" aria-controls="offcanvas">
-                <span class="flex items-center">
-                    <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="mdi:music-note-add"></iconify-icon>
-                    <span>Thêm nhạc</span>
-                </span>
-            </button>
+                <button class="btn inline-flex justify-center btn-light basis-1/5 space-x-4" id="pause" data-state="{{ pause }}" {{ 'disabled' if not connected and not pause }}>
+                    <span class="flex items-center pause {{ 'hidden' if not pause }}">
+                        <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="solar:pause-bold"></iconify-icon>
+                        <span>Tạm Dừng</span>
+                    </span>
+                    <span class="flex items-center resume {{ 'hidden' if pause }}">
+                        <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2"
+                                      icon="material-symbols:resume-rounded"></iconify-icon>
+                        <span>Phát nhạc</span>
+                    </span>
+                </button>
+                <a href="/profile{{ ('/' + profile) if profile }}" class="p-0 m-0 basis-1/5 space-x-4">
+                    <button class="btn inline-flex justify-center btn-{{ 'primary' if profile else 'danger' }} w-full set_default_profile">
+                        <span class="flex items-center">
+                            <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2"
+                                          icon="f7:person-crop-circle-fill-badge-checkmark"></iconify-icon>
+                            <span>{{ profile if profile else 'Chưa chọn profile' }}</span>
+                        </span>
+                    </button>
+                </a>
+                <button class="btn inline-flex justify-center btn-light basis-1/5 space-x-4" data-bs-toggle="modal"
+                        data-bs-target="#app_setting" data-profile="{{ profile }}">
+                    <span class="flex items-center">
+                        <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="ant-design:setting-filled"></iconify-icon>
+                        <span>Cài Đặt</span>
+                    </span>
+                </button>
+            </div>
+            <div class="flex gap-4 w-full justify-center items-center align-center">
+                <button class="btn inline-flex justify-center btn-light basis-1/5 space-x-4" data-bs-toggle="offcanvas" data-bs-target="#add_music" aria-controls="offcanvas">
+                    <span class="flex items-center">
+                        <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="mdi:music-note-add"></iconify-icon>
+                        <span>Thêm nhạc</span>
+                    </span>
+                </button>
+                <button class="btn inline-flex justify-center btn-danger basis-1/5 space-x-4" id="reset_queue">
+                    <span class="flex items-center">
+                        <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="icon-park-solid:clear"></iconify-icon>
+                        <span>Reset danh sách</span>
+                    </span>
+                </button>
+            </div>
         </div>
 
         <div class="flex flex-wrap justify-center gap-6 w-full h-full" id="queue">
