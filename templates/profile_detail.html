@@ -1,0 +1,451 @@
+{% extends 'base.html' %}
+
+{% import 'macro.html' as macros %}
+
+{% block custom_js %}
+    <script type="module" src="/static/js/profile_detail.js"></script>
+{% endblock %}
+
+{% block custom_css %}
+    <!-- <link rel="stylesheet" href="/static/css/sidebar-menu.css">-->
+{% endblock %}
+
+{% block title %}
+    Profile
+{% endblock %}
+
+{% block content %}
+    <div id="page-content" class="dark transition-all ease-in-out duration-200 flex flex-col min-h-screen items-center align-center p-8 space-y-8">
+        <div class="flex gap-4 w-full justify-center items-center align-center">
+            <button class="btn inline-flex justify-center btn-light basis-1/5" data-bs-toggle="modal" data-bs-target="#add_gift" data-profile="{{ profile }}">
+                <span class="flex items-center">
+                    <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="basil:add-solid"></iconify-icon>
+                    <span>Thêm quà</span>
+                </span>
+            </button>
+            <button class="btn inline-flex justify-center btn-light basis-1/5" data-bs-toggle="modal" data-bs-target="#profile_setting" data-profile="{{ profile }}">
+                <span class="flex items-center">
+                    <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="ant-design:setting-filled"></iconify-icon>
+                    <span>Cài Đặt</span>
+                </span>
+            </button>
+            <button class="btn inline-flex justify-center btn-primary basis-1/5 set_default_profile" data-profile="{{ profile }}" {{ 'disabled' if profile == profiles['default']}}>
+                <span class="flex items-center">
+                    <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="{{ 'f7:person-crop-circle-fill-badge-checkmark' if profile == profiles['default'] else 'fluent:checkbox-person-16-filled' }}"></iconify-icon>
+                    <span>{{ 'Đang Sử Dụng' if profile == profiles['default'] else 'Sử Dụng' }}</span>
+                </span>
+            </button>
+            <button class="btn inline-flex justify-center btn-danger basis-1/5" data-bs-toggle="modal" data-bs-target="#delete_profile">
+                <span class="flex items-center">
+                    <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="fluent:delete-12-filled"></iconify-icon>
+                    <span>Xóa</span>
+                </span>
+            </button>
+        </div>
+        <div class="flex flex-wrap justify-center gap-6 w-full h-full">
+                <div class="{{ 'hidden ' if gift_config }} min-h-[168px] border-dashed border-2 border-slate-800 rounded-2xl p-5 cursor-pointer basis-[40%]" data-bs-toggle="modal" data-bs-target="#add_gift" data-profile="{{ profile }}">
+                    <span class="flex flex-col items-center justify-center text-slate-800 w-full h-full font-bold text-3xl">
+                        <iconify-icon class="ltr:mr-2 rtl:ml-2" icon="ph:plus-bold"></iconify-icon>
+                        <span>Thêm Quà</span>
+                    </span>
+                </div>
+            {% for gc in gift_config %}
+                <div class="bg-slate-800 hover:bg-slate-700 shadow rounded-2xl p-5 cursor-pointer gift-item basis-[40%]" data-bs-toggle="modal" data-bs-target="#edit_gift" data-json="{{ gc }}" data-profile="{{ profile }}">
+                    <div class="relative">
+                        <iconify-icon class="text-3xl ml-2 absolute right-0" icon="bxs:edit"></iconify-icon>
+                    </div>
+                    <div class="flex items-center gap-6 ">
+                        <img src="{{ gc['thumbnail'] }}" alt="" class="h-32">
+                        <div class="flex flex-col gap-1">
+                            <h2 class="text-xl">{{ gc['name'] }}</h2>
+                            <p class="font-medium text-lg text-gray-500">{{ gc['gift_name'] }}</p>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="flex badge bg-slate-900 text-slate-300 bg-opacity-30 capitalize font-bold">
+                                    <div class="w-4 h-4 mr-1">
+                                        <img src="/static/images/coin.png" alt="" class="w-full h-full object-cover">
+                                    </div>
+                                    {{ "{:,}".format(gc['price'])}}
+                                </span>
+                                {% if gc['sounds'] %}
+                                 <span class="badge bg-secondary-500 text-slate-900 bg-opacity-30 capitalize font-bold">{{ gc['sounds'] | length }} NHẠC</span>
+                                {% endif %}
+                                {% if not gc['types'] %}
+                                    <span class="badge bg-secondary-500 text-slate-900 bg-opacity-30 capitalize font-bold">THƯỜNG</span>
+                                {% else %}
+                                    {% for type in gc['types'] %}
+                                        {% if type == "PRIORITY" %}
+                                            <span class="badge bg-danger-500 text-danger-500 bg-opacity-30 capitalize font-bold">ƯU TIÊN</span>
+                                        {% elif type == "RESET" %}
+                                            <span class="badge bg-warning-500 text-warning-500 bg-opacity-30 capitalize font-bold">RESET</span>
+                                        {% elif type == "RESCUE" %}
+                                            <span class="badge bg-success-500 text-success-500 bg-opacity-30 capitalize font-bold">GIẢI CỨU</span>
+                                        {% elif type == "FAST" %}
+                                            <span class="badge bg-primary-500 text-primary-500 bg-opacity-30 capitalize font-bold">TĂNG TỐC</span>
+                                        {% elif type == "SLOW" %}
+                                            <span class="badge bg-primary-500 text-primary-500 bg-opacity-30 capitalize font-bold">GIẢM TỐC</span>
+                                        {% else %}
+                                            <span class="badge bg-primary-500 text-primary-500 bg-opacity-30 capitalize font-bold">{{ type }}</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    
+        <!-- MODEL DELETE PROFILE -->
+        <div class="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto"
+             id="delete_profile" tabindex="-1" aria-labelledby="disabled_animation" style="display: none;"
+             aria-hidden="true">
+            <div class="modal-dialog top-0 !-translate-y-0 relative w-auto pointer-events-none">
+                <div class="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-clip-padding
+                        rounded-md outline-none text-current">
+                    <div class="relative rounded-lg shadow dark:bg-slate-800">
+                        <div class="card">
+                            <div class="card-body flex flex-col p-6">
+                                <header class="flex mb-5 items-center border-b border-slate-100 dark:border-slate-700 pb-5 -mx-6 px-6">
+                                    <div class="flex-1">
+                                        <div class="card-title text-slate-900 dark:text-white">Xóa Profile</div>
+                                    </div>
+                                </header>
+                                <div class="card-text h-full space-y-4">
+                                    <div>Bạn có chắc chắn muốn xóa profile <span class="font-bold text-danger-500">'{{ profile }}'</span></div>
+                                    <button class="btn inline-flex justify-center btn-danger submit" data-profile="{{ profile }}">Gửi</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODEL PROFILE SETTING -->
+        <div class="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto"
+             id="profile_setting" tabindex="-1" aria-labelledby="disabled_animation" style="display: none;"
+             aria-hidden="true">
+            <div class="modal-dialog top-0 !-translate-y-0 relative w-auto pointer-events-none">
+                <div class="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-clip-padding
+                        rounded-md outline-none text-current">
+                    <div class="relative rounded-lg shadow dark:bg-slate-800">
+                        <div class="card">
+                            <div class="card-body flex flex-col p-6">
+                                <header class="flex mb-5 items-center border-b border-slate-100 dark:border-slate-700 pb-5 -mx-6 px-6">
+                                    <div class="flex-1">
+                                        <div class="card-title text-slate-900 dark:text-white">Cài đặt Profile</div>
+                                    </div>
+                                </header>
+                                <div class="card-text h-full space-y-4">
+                                    <form class="space-y-4">
+                                        <input type="text" class="form-control hidden profile_name" placeholder="" value="{{ profile }}" disabled>
+                                        <div class="input-area relative">
+                                            <label for="largeInput" class="form-label">Nhạc nền</label>
+                                            <input type="text" class="form-control background_music" placeholder="Nhập đường dẫn file nhạc (trên máy)" value="{{ setting['background_music'] }}">
+                                        </div>
+                                        <div class="input-area relative">
+                                            <label for="largeInput" class="form-label">Nhạc chuyển</label>
+                                            <input type="text" class="form-control cross_music" placeholder="Nhập đường dẫn file nhạc (trên máy)" value="{{ setting['cross_music'] }}">
+                                        </div>
+                                        <div class="input-area relative">
+                                            <label for="largeInput" class="form-label">Thêm danh sách chờ</label>
+                                            <div class="flex gap-6">
+                                                <label class="flex items-center cursor-pointer gap-2">
+                                                      <input type="radio" class="" name="queue_type[]" value="GIFT" {{ 'checked' if setting['queue_type'] == "GIFT" or not setting['queue_type'] }}>
+                                                      <span class="text-slate-900 font-Inter font-normal text-sm leading-6 capitalize dark:text-slate-300">Ngay lập tức</span>
+                                                </label>
+                                                <label class="flex items-center cursor-pointer gap-2">
+                                                      <input type="radio" class="" name="queue_type[]" value="COMBO" {{ 'checked' if setting['queue_type'] == "COMBO" }}>
+                                                      <span class="text-slate-900 font-Inter font-normal text-sm leading-6 capitalize dark:text-slate-300">Hết combo</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </form>
+                                    <button class="btn inline-flex justify-center btn-dark submit">Lưu</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODEL ADD GIFT -->
+        <div class="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto"
+             id="add_gift" tabindex="-1" aria-labelledby="disabled_animation" style="display: none;"
+             aria-hidden="true">
+            <div class="modal-dialog top-0 !-translate-y-0 relative w-auto pointer-events-none">
+                <div class="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-clip-padding
+                        rounded-md outline-none text-current">
+                    <div class="relative rounded-lg shadow dark:bg-slate-800">
+                        <div class="card">
+                            <div class="card-body flex flex-col p-6">
+                                <header class="flex mb-5 items-center border-b border-slate-100 dark:border-slate-700 pb-5 -mx-6 px-6">
+                                    <div class="flex-1">
+                                        <div class="card-title text-slate-900 dark:text-white">Thêm Quà</div>
+                                    </div>
+                                </header>
+                                <div class="card-text h-full space-y-4">
+                                    <form class="space-y-4">
+                                        <div class="input-area relative">
+                                            <label for="largeInput" class="form-label">Profile</label>
+                                            <input type="text" class="form-control profile_name" readonly="readonly"
+                                                   placeholder="Tên profile" value="{{ profile }}">
+                                        </div>
+                                        <div class="input-area relative">
+                                            <label for="largeInput" class="form-label">Tên hiển thị</label>
+                                            <input type="text" class="form-control gift_name"
+                                                   placeholder="Tên Quà">
+                                        </div>
+                                        <div class="input-area relative">
+                                            <label for="largeInput" class="form-label">Chọn quà</label>
+                                            <select class="data-gift">
+                                                {% for gift in gifts %}
+                                                    <option value="0" data-src=""></option>
+                                                    <option value="{{ gift['id'] }}" data-src="{{ gift['thumbnail'] }}">
+                                                        {{ gift['name'] }}|{{ gift['price'] }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="input-area relative">
+                                            <label for="largeInput" class="form-label">Chọn loại quà</label>
+                                            <div class="card-text h-full space-y-4">
+                                                <div class="gap-2 grid grid-cols-2">
+                                                    <div class="checkbox-area">
+                                                        <label class="inline-flex items-center cursor-pointer">
+                                                            <input type="checkbox" class="hidden" value="PRIORITY"
+                                                                   name="gift_type[]">
+                                                            <span class="h-4 w-4 border flex-none border-slate-100 dark:border-slate-800 rounded inline-flex ltr:mr-3 rtl:ml-3 relative transition-all duration-150 bg-slate-100 dark:bg-slate-900">
+                                                                <img src="/static/images/icon/ck-white.svg" alt=""
+                                                                     class="h-[10px] w-[10px] block m-auto opacity-0">
+                                                            </span>
+                                                            <span class="text-slate-500 dark:text-slate-400 text-sm leading-6">Ưu Tiên</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="checkbox-area">
+                                                        <label class="inline-flex items-center cursor-pointer">
+                                                            <input type="checkbox" class="hidden" value="FAST"
+                                                                   name="gift_type[]">
+                                                            <span class="h-4 w-4 border flex-none border-slate-100 dark:border-slate-800 rounded inline-flex ltr:mr-3 rtl:ml-3 relative transition-all duration-150 bg-slate-100 dark:bg-slate-900">
+                                                                <img src="/static/images/icon/ck-white.svg" alt=""
+                                                                     class="h-[10px] w-[10px] block m-auto opacity-0">
+                                                            </span>
+                                                            <span class="text-slate-500 dark:text-slate-400 text-sm leading-6">Tăng Tốc</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="checkbox-area">
+                                                        <label class="inline-flex items-center cursor-pointer">
+                                                            <input type="checkbox" class="hidden" value="RESCUE"
+                                                                   name="gift_type[]">
+                                                            <span class="h-4 w-4 border flex-none border-slate-100 dark:border-slate-800 rounded inline-flex ltr:mr-3 rtl:ml-3 relative transition-all duration-150 bg-slate-100 dark:bg-slate-900">
+                                                                <img src="/static/images/icon/ck-white.svg" alt=""
+                                                                     class="h-[10px] w-[10px] block m-auto opacity-0">
+                                                            </span>
+                                                            <span class="text-slate-500 dark:text-slate-400 text-sm leading-6">Giải Cứu</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="checkbox-area">
+                                                        <label class="inline-flex items-center cursor-pointer">
+                                                            <input type="checkbox" class="hidden" value="SLOW"
+                                                                   name="gift_type[]">
+                                                            <span class="h-4 w-4 border flex-none border-slate-100 dark:border-slate-800 rounded inline-flex ltr:mr-3 rtl:ml-3 relative transition-all duration-150 bg-slate-100 dark:bg-slate-900">
+                                                                <img src="/static/images/icon/ck-white.svg" alt=""
+                                                                     class="h-[10px] w-[10px] block m-auto opacity-0">
+                                                            </span>
+                                                            <span class="text-slate-500 dark:text-slate-400 text-sm leading-6">Giảm Tốc</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="checkbox-area">
+                                                        <label class="inline-flex items-center cursor-pointer">
+                                                            <input type="checkbox" class="hidden" value="RESET"
+                                                                   name="gift_type[]">
+                                                            <span class="h-4 w-4 border flex-none border-slate-100 dark:border-slate-800 rounded inline-flex ltr:mr-3 rtl:ml-3 relative transition-all duration-150 bg-slate-100 dark:bg-slate-900">
+                                                                <img src="/static/images/icon/ck-white.svg" alt=""
+                                                                     class="h-[10px] w-[10px] block m-auto opacity-0">
+                                                            </span>
+                                                            <span class="text-slate-500 dark:text-slate-400 text-sm leading-6">Reset Tất Cả</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="input-area relative sound_group">
+                                            <div class="flex sg_header">
+                                                <label for="largeInput" class="form-label">Đường dẫn file nhạc</label>
+                                                <iconify-icon class="text-xl ml-2" icon="ph:plus-bold"></iconify-icon>
+                                            </div>
+                                            <div class="sg_body space-y-2">
+                                                <div class="flex items-center">
+                                                    <input type="text" name="gift_sound[]" class="form-control pb-2"
+                                                           placeholder="Nhập đường dẫn file nhạc (trên máy)">
+                                                    <div class="remove_sound ml-2">
+                                                        <iconify-icon class="text-xl" icon="ph:minus-fill"></iconify-icon>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                    <button class="btn inline-flex justify-center btn-primary submit">Gửi</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODEL EDIT GIFT -->
+        <div class="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto"
+             id="edit_gift" tabindex="-1" aria-labelledby="disabled_animation" style="display: none;"
+             aria-hidden="true">
+            <div class="modal-dialog top-0 !-translate-y-0 relative w-auto pointer-events-none">
+                <div class="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-clip-padding
+                        rounded-md outline-none text-current">
+                    <div class="relative rounded-lg shadow dark:bg-slate-800">
+                        <div class="card">
+                            <div class="card-body flex flex-col p-6">
+                                <header class="flex mb-5 items-center border-b border-slate-100 dark:border-slate-700 pb-5 -mx-6 px-6">
+                                    <div class="flex-1">
+                                        <div class="card-title text-slate-900 dark:text-white">Chỉnh Sửa Quà</div>
+                                    </div>
+                                </header>
+                                <div class="card-text h-full space-y-4">
+                                    <form class="space-y-4">
+                                        <div class="input-area relative">
+                                            <label for="largeInput" class="form-label">Profile</label>
+                                            <input type="text" class="form-control profile_name" readonly="readonly"
+                                                   placeholder="Tên profile" value="{{ profile }}">
+                                        </div>
+                                        <div class="input-area relative">
+                                            <label for="largeInput" class="form-label">Tên hiển thị</label>
+                                            <input type="text" class="form-control gift_name"
+                                                   placeholder="Tên Quà">
+                                        </div>
+                                        <div class="input-area relative">
+                                            <label for="largeInput" class="form-label">Chọn quà</label>
+                                            <select class="data-gift">
+                                                {% for gift in gifts %}
+                                                    <option value="0" data-src=""></option>
+                                                    <option value="{{ gift['id'] }}" data-src="{{ gift['thumbnail'] }}">
+                                                        {{ gift['name'] }}|{{ gift['price'] }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="input-area relative">
+                                            <label for="largeInput" class="form-label">Chọn loại quà</label>
+                                            <div class="card-text h-full space-y-4">
+                                                <div class="gap-2 grid grid-cols-2">
+                                                    <div class="checkbox-area">
+                                                        <label class="inline-flex items-center cursor-pointer">
+                                                            <input type="checkbox" class="hidden" value="PRIORITY"
+                                                                   name="gift_type[]">
+                                                            <span class="h-4 w-4 border flex-none border-slate-100 dark:border-slate-800 rounded inline-flex ltr:mr-3 rtl:ml-3 relative transition-all duration-150 bg-slate-100 dark:bg-slate-900">
+                                                                <img src="/static/images/icon/ck-white.svg" alt=""
+                                                                     class="h-[10px] w-[10px] block m-auto opacity-0">
+                                                            </span>
+                                                            <span class="text-slate-500 dark:text-slate-400 text-sm leading-6">Ưu Tiên</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="checkbox-area">
+                                                        <label class="inline-flex items-center cursor-pointer">
+                                                            <input type="checkbox" class="hidden" value="FAST"
+                                                                   name="gift_type[]">
+                                                            <span class="h-4 w-4 border flex-none border-slate-100 dark:border-slate-800 rounded inline-flex ltr:mr-3 rtl:ml-3 relative transition-all duration-150 bg-slate-100 dark:bg-slate-900">
+                                                                <img src="/static/images/icon/ck-white.svg" alt=""
+                                                                     class="h-[10px] w-[10px] block m-auto opacity-0">
+                                                            </span>
+                                                            <span class="text-slate-500 dark:text-slate-400 text-sm leading-6">Tăng Tốc</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="checkbox-area">
+                                                        <label class="inline-flex items-center cursor-pointer">
+                                                            <input type="checkbox" class="hidden" value="RESCUE"
+                                                                   name="gift_type[]">
+                                                            <span class="h-4 w-4 border flex-none border-slate-100 dark:border-slate-800 rounded inline-flex ltr:mr-3 rtl:ml-3 relative transition-all duration-150 bg-slate-100 dark:bg-slate-900">
+                                                                <img src="/static/images/icon/ck-white.svg" alt=""
+                                                                     class="h-[10px] w-[10px] block m-auto opacity-0">
+                                                            </span>
+                                                            <span class="text-slate-500 dark:text-slate-400 text-sm leading-6">Giải Cứu</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="checkbox-area">
+                                                        <label class="inline-flex items-center cursor-pointer">
+                                                            <input type="checkbox" class="hidden" value="SLOW"
+                                                                   name="gift_type[]">
+                                                            <span class="h-4 w-4 border flex-none border-slate-100 dark:border-slate-800 rounded inline-flex ltr:mr-3 rtl:ml-3 relative transition-all duration-150 bg-slate-100 dark:bg-slate-900">
+                                                                <img src="/static/images/icon/ck-white.svg" alt=""
+                                                                     class="h-[10px] w-[10px] block m-auto opacity-0">
+                                                            </span>
+                                                            <span class="text-slate-500 dark:text-slate-400 text-sm leading-6">Giảm Tốc</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="checkbox-area">
+                                                        <label class="inline-flex items-center cursor-pointer">
+                                                            <input type="checkbox" class="hidden" value="RESET"
+                                                                   name="gift_type[]">
+                                                            <span class="h-4 w-4 border flex-none border-slate-100 dark:border-slate-800 rounded inline-flex ltr:mr-3 rtl:ml-3 relative transition-all duration-150 bg-slate-100 dark:bg-slate-900">
+                                                                <img src="/static/images/icon/ck-white.svg" alt=""
+                                                                     class="h-[10px] w-[10px] block m-auto opacity-0">
+                                                            </span>
+                                                            <span class="text-slate-500 dark:text-slate-400 text-sm leading-6">Reset Tất Cả</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="input-area relative sound_group">
+                                            <div class="flex sg_header">
+                                                <label for="largeInput" class="form-label">Đường dẫn file nhạc</label>
+                                                <iconify-icon class="text-xl ml-2" icon="ph:plus-bold"></iconify-icon>
+                                            </div>
+                                            <div class="sg_body space-y-2">
+                                            </div>
+                                        </div>
+                                    </form>
+                                    <div class="flex gap-4">
+                                        <button class="btn inline-flex justify-center btn-primary submit">Gửi</button>
+                                        <button class="btn inline-flex justify-center btn-danger delete">Xóa</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODEL ADD PROFILE -->
+        <div class="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto"
+             id="add_profile" tabindex="-1" aria-labelledby="disabled_animation" style="display: none;"
+             aria-hidden="true">
+            <div class="modal-dialog top-0 !-translate-y-0 relative w-auto pointer-events-none">
+                <div class="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-clip-padding
+                        rounded-md outline-none text-current">
+                    <div class="relative rounded-lg shadow dark:bg-slate-800">
+                        <div class="card">
+                            <div class="card-body flex flex-col p-6">
+                                <header class="flex mb-5 items-center border-b border-slate-100 dark:border-slate-700 pb-5 -mx-6 px-6">
+                                    <div class="flex-1">
+                                        <div class="card-title text-slate-900 dark:text-white">Tạo Profile</div>
+                                    </div>
+                                </header>
+                                <div class="card-text h-full space-y-4 add_profile">
+                                    <form class="space-y-4">
+                                        <div class="input-area relative">
+                                            <label for="largeInput" class="form-label">Tên Profile</label>
+                                            <input type="text" class="form-control profile_name"
+                                                   placeholder="Nhập tên profile">
+                                        </div>
+                                    </form>
+                                    <button class="btn inline-flex justify-center btn-primary submit">Gửi</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

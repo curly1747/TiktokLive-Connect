@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.ts-control {
+    @apply bg-slate-900 !important;
+    @apply border-[1px] !important;
+    border-color: rgb(51 65 85 / var(--tw-text-opacity)) !important;
+    @apply gap-2 !important;
+}
+
+.ts-dropdown {
+    @apply bg-slate-800 !important;
+    @apply border-[1px] !important;
+    border-color: rgb(51 65 85 / var(--tw-text-opacity)) !important;
+}
+
+.ts-dropdown .active {
+    @apply bg-slate-900 !important;
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+.offcanvas-backdrop, .offcanvas {
+    @apply m-0 !important;
+}
+
+.ts-wrapper.multi .ts-control > div {
+    @apply bg-slate-800 !important;
+    @apply rounded-sm !important;
+}
+
+.hr {
+    @apply my-12 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-slate-900 to-transparent opacity-25 dark:opacity-100;
+}

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<!-- Template Name: DashCode - HTML, React, Vue, Tailwind Admin Dashboard Template Author: Codeshaper Website: https://codeshaper.net Contact: support@codeshaperbd.net Like: https://www.facebook.com/Codeshaperbd Purchase: https://themeforest.net/item/dashcode-admin-dashboard-template/42600453 License: You must have a valid license purchased only from themeforest(the above link) in order to legally use the theme for your project. -->
+<html lang="zxx" dir="ltr" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <title>{% block title %} {% endblock %} | TikTok Live Connect</title>
+    <link rel="icon" type="image/png" href="/static/images/favicon.svg">
+    <!-- BEGIN: Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet">
+    <!-- END: Google Font -->
+    <!-- BEGIN: Theme CSS-->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/sidebar-menu.css">
+    <link rel="stylesheet" href="/static/css/SimpleBar.css">
+    <link rel="stylesheet" href="/static/css/app.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    {% block custom_css %} {% endblock %}
+    <!-- END: Theme CSS-->
+    <script src="/static/js/settings.js" sync></script>
+</head>
+
+<body class="font-inter dashcode-app" id="body_class">
+<!-- [if IE]> <p class="browserupgrade"> You are using an <strong>outdated</strong> browser. Please <a
+        href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security. </p>
+<![endif] -->
+<main class="app-wrapper extend">
+    <!-- BEGIN: Sidebar -->
+    <!-- BEGIN: Sidebar -->
+    <div class="sidebar-wrapper group">
+        <div id="bodyOverlay"
+             class="w-screen h-screen fixed top-0 bg-slate-900 bg-opacity-50 backdrop-blur-sm z-10 hidden"></div>
+        <div class="logo-segment">
+            <a class="flex items-center" href="/">
+                <img src="/static/images/angel_k.svg" class="white_logo" alt="logo">
+            </a>
+        </div>
+        <div id="nav_shadow" class="nav_shadow h-[60px] absolute top-[80px] nav-shadow z-[1] w-full transition-all duration-200 pointer-events-none
+      opacity-0"></div>
+        <div class="sidebar-menus bg-white dark:bg-slate-800 py-2 px-4 h-[calc(100%-80px)] overflow-y-auto z-50"
+             id="sidebar_menus">
+            <ul class="sidebar-menu gap-4 flex flex-col">
+                <li class="">
+                    <a href="/" class="navItem hover:bg-blue-900 btn-dark">
+                      <span class="flex items-center text-sm px-2">
+                        <iconify-icon class=" nav-icon" icon="material-symbols:dashboard-rounded"></iconify-icon>
+                        <span>BẢNG ĐIỀU KHIỂN</span>
+                      </span>
+                    </a>
+                </li>
+                <li class="">
+                    <a href="/pk" class="navItem hover:bg-blue-900 btn-dark">
+                      <span class="flex items-center text-sm px-2">
+                        <iconify-icon class=" nav-icon" icon="material-symbols:swords"></iconify-icon>
+                        <span>PK MODE</span>
+                      </span>
+                    </a>
+                </li>
+                <li class="">
+                    <a href="/profile" class="navItem hover:bg-blue-900 btn-dark">
+                      <span class="flex items-center text-sm px-2">
+                        <iconify-icon class=" nav-icon" icon="mdi:person-group"></iconify-icon>
+                        <span>PROFILE</span>
+                      </span>
+                    </a>
+                </li>
+                <div class="flex flex-col gap-2 ml-4">
+                    {% for p in profiles['list'] %}
+                    <li class="">
+                        <a href="/profile/{{ p }}" class="px-2 py-3 rounded navItem hover:bg-blue-900 {{ 'active' if profile and profile == p }}">
+                          <span class="flex items-center text-sm">
+                            <iconify-icon class=" nav-icon" icon="{{ 'lets-icons:check-fill' if p==profiles['default'] else 'f7:person-crop-circle-fill'}}"></iconify-icon>
+                            <span>{{ p }}</span>
+                          </span>
+                        </a>
+                    </li>
+                {% endfor %}
+                </div>
+            </ul>
+        </div>
+    </div>
+
+    <div class="flex flex-col justify-between">
+        <div class="content-wrapper transition-all duration-150 ltr:ml-[248px] rtl:mr-[248px]" id="content_wrapper">
+            {% block content %} {% endblock %}
+        </div>
+    </div>
+</main>
+<div x-data="{ position : 'top-right' }"
+     class="absolute top-0 right-0 px-2 my-3 overflow-x-hidden z-50 max-w-xs z-[999999] flex flex-col gap-4"
+     :class="{
+                'top-0 right-0': position =='top-right',
+                'top-0 left-0': position == 'top-left',
+                'bottom-0 left-0': position =='bottom-left',
+                'bottom-0 right-0': position =='bottom-right',
+                'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2': position == 'center',
+                'top-0 left-1/2 transform -translate-x-1/2 -translate-y-0': position == 'top-center',
+                'bottom-0 left-1/2 transform -translate-x-1/2 -translate-y-0': position == 'bottom-center',
+                'top-1/2 left-0 transform -translate-x-0 -translate-y-1/2': position == 'left-center',
+                'top-1/2 right-0 transform -translate-x-0 -translate-y-1/2': position == 'right-center',
+                }">
+
+    <template x-for="(toast, index) in $store.toasts.list" :key="toast.id">
+        <div class="py-[18px] px-6 font-normal text-sm rounded-md bg-opacity-[66%] text-white"
+             x-show="toast.visible" x-transition:enter="transition ease-in duration-200"
+             x-transition:enter-start="transform opacity-0 translate-y-2" x-transition:enter-end="transform opacity-100"
+             x-transition:leave="transition ease-out duration-500"
+             x-transition:leave-start="transform translate-x-0 opacity-100"
+             x-transition:leave-end="transform -translate-y-2 opacity-0"
+             :class="{
+            'bg-info-500': toast.type === 'info',
+            'bg-success-500': toast.type === 'success',
+            'bg-warning-500': toast.type === 'warning',
+            'bg-danger-500': toast.type === 'error',
+            }">
+
+            <div class="flex items-center space-x-3 rtl:space-x-reverse text-white">
+                <iconify-icon x-show="toast.type == 'info'" class="text-2xl flex-0" icon="ph:info-fill" ></iconify-icon>
+                <iconify-icon x-show="toast.type == 'success'" class="text-2xl flex-0" icon="ep:success-filled" ></iconify-icon>
+                <iconify-icon x-show="toast.type == 'warning'" class="text-2xl flex-0" icon="mingcute:warning-fill" ></iconify-icon>
+                <iconify-icon x-show="toast.type == 'error'" class="text-2xl flex-0" icon="mingcute:warning-fill" ></iconify-icon>
+                <p class="flex-1 font-Inter" x-text="toast.message"></p>
+                <div class="flex-0 text-xl cursor-pointer">
+                    <iconify-icon icon="line-md:close" @click="$store.toasts.destroyToast(index)"></iconify-icon>
+
+                </div>
+            </div>
+        </div>
+
+    </template>
+</div>
+<!-- scripts -->
+<!-- Core Js -->
+<script src="/static/js/jquery-3.6.0.min.js"></script>
+<script src="/static/js/popper.js"></script>
+<script src="/static/js/tw-elements-1.0.0-alpha13.min.js"></script>
+<script src="/static/js/SimpleBar.js"></script>
+<script src="/static/js/iconify.js"></script>
+<!-- Jquery Plugins -->
+
+<!-- app js -->
+<script src="/static/js/sidebar-menu.js"></script>
+<script src="/static/js/app.js"></script>
+<script src="/static/js/toast.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+        integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+        crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+{% block custom_js %} {% endblock %}
+</body>
+</html>

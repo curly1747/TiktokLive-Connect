@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% import 'macro.html' as macros %}
+
+{% block custom_js %}
+    <script type="module" src="/static/js/profile.js"></script>
+{% endblock %}
+
+{% block custom_css %}
+    <!-- <link rel="stylesheet" href="/static/css/sidebar-menu.css">-->
+{% endblock %}
+
+{% block title %}
+    Profile
+{% endblock %}
+
+{% block content %}
+    <div id="page-content" class="dark transition-all ease-in-out duration-200 flex flex-col min-h-screen items-center align-center p-8 space-y-8">
+        {% if not profiles['list'] %}
+            <div class="flex justify-center flex-wrap items-center flex-col text-center gap-4">
+                <img src="/static/images/svg/img-2.svg" alt="">
+                <button class="btn btn-dark dark:bg-slate-800 inline-flex justify-center btn-primary mx-auto w-full max-w-80"
+                        data-bs-toggle="modal" data-bs-target="#add_profile">
+                    <span class="flex items-center">
+                        <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="heroicons:plus-16-solid"></iconify-icon>
+                        <span>Tạo Profile</span>
+                    </span>
+                </button>
+            </div>
+        {% else %}
+            <div class="flex flex-wrap justify-center gap-6 w-full h-full">
+                <div class="{{ 'min-h-[168px]' if not profiles['list'] }} border-dashed border-2 border-slate-800 rounded-2xl p-5 basis-[40%] cursor-pointer" data-bs-toggle="modal" data-bs-target="#add_profile" data-profile="{{ profile }}">
+                    <span class="flex flex-col items-center justify-center text-slate-800 w-full h-full font-bold text-3xl">
+                        <iconify-icon class="ltr:mr-2 rtl:ml-2" icon="ph:plus-bold"></iconify-icon>
+                        <span>Thêm Profile</span>
+                    </span>
+                </div>
+                {% for p in profiles['list'] %}
+                <div class="bg-slate-800 hover:bg-slate-700 shadow rounded-2xl p-5 basis-[40%] cursor-pointer">
+                    <a href="/profile/{{ p }}">
+                        <div>
+                            <div class="relative">
+                                <iconify-icon class="text-3xl ml-2 absolute right-0" icon="bxs:edit"></iconify-icon>
+                            </div>
+                            <div class="flex flex-col items-center justify-center gap-1 text-slate-300">
+                                <iconify-icon class="text-4xl" icon="{{ 'f7:person-crop-circle-fill-badge-checkmark' if p==profiles['default'] else 'f7:person-crop-circle-fill'}}"></iconify-icon>
+                                <span class="text-xl">{{ p }}</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- MODEL ADD PROFILE -->
+        <div class="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto"
+             id="add_profile" tabindex="-1" aria-labelledby="disabled_animation" style="display: none;"
+             aria-hidden="true">
+            <div class="modal-dialog top-0 !-translate-y-0 relative w-auto pointer-events-none">
+                <div class="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-clip-padding
+                        rounded-md outline-none text-current">
+                    <div class="relative rounded-lg shadow dark:bg-slate-800">
+                        <div class="card">
+                            <div class="card-body flex flex-col p-6">
+                                <header class="flex mb-5 items-center border-b border-slate-100 dark:border-slate-700 pb-5 -mx-6 px-6">
+                                    <div class="flex-1">
+                                        <div class="card-title text-slate-900 dark:text-white">Tạo Profile</div>
+                                    </div>
+                                </header>
+                                <div class="card-text h-full space-y-4">
+                                    <form class="space-y-4">
+                                        <div class="input-area relative">
+                                            <label for="largeInput" class="form-label">Tên Profile</label>
+                                            <input type="text" class="form-control profile_name"
+                                                   placeholder="Nhập tên profile">
+                                        </div>
+                                    </form>
+                                    <button class="btn inline-flex justify-center btn-primary submit">Gửi</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    </div>
+{% endblock %}

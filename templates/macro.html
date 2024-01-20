@@ -1,0 +1,25 @@
+{% macro render_cast_list(stream, casts) %}
+    {% for cast in casts %}
+        {% if cast.person.avatar %}
+            {% set style = '' %}
+            {% set avatar = "https://image.tmdb.org/t/p/w500" + cast.person.avatar %}
+        {% else %}
+            {% set style = 'background-color: #dbdbdb; object-fit:fill;' %}
+            {% set avatar = "/static/image/icon/avatar-placeholder.svg" %}
+        {% endif %}
+        <!-- Cast items -->
+        <a href="/name/{{ cast.person.id }}-{{ cast.person.name }}/">
+            <div class="cast-item slide-item relative">
+                <div class="cast-container">
+                    <img style="{{ style }}"
+                         alt="Diễn viên {{ cast.person.name }} trong phim {{ stream.name_vn }} {{ stream.name_en }}"
+                         class="cast-avatar"
+                         src="{{ avatar }}">
+                    {#                    <div class="absolute w-full h-full bg-[url('static/image/icon/avatar-placeholder.svg')]"></div>#}
+                </div>
+                <span class="cast-name">{{ cast.person.name }}</span>
+                <span class="cast-character-name">{{ cast.character }}</span>
+            </div>
+        </a>
+    {% endfor %}
+{% endmacro %}
