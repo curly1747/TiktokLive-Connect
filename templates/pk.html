@@ -92,7 +92,14 @@
                     data-bs-target="#config" data-profile="{{ profile }}">
                 <span class="flex items-center">
                     <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="ant-design:setting-filled"></iconify-icon>
-                    <span>Cài Đặt</span>
+                    <span>Cài Đặt PK</span>
+                </span>
+            </button>
+            <button id="config_button" class="btn inline-flex justify-center btn-light basis-1/5" data-bs-toggle="modal"
+                    data-bs-target="#music_config" data-profile="{{ profile }}">
+                <span class="flex items-center">
+                    <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="majesticons:music"></iconify-icon>
+                    <span>Cài Đặt Nhạc</span>
                 </span>
             </button>
         </div>
@@ -219,6 +226,48 @@
                                                 </option>
                                             {% endfor %}
                                         </select>
+                                    </div>
+                                </form>
+                                <button class="btn inline-flex justify-center btn-primary submit">Gửi</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODEL CONFIG MUSIC -->
+    <div class="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto"
+             id="music_config" tabindex="-1" aria-labelledby="disabled_animation" style="display: none;"
+             aria-hidden="true" data-sounds="{{ pk_config['sounds'] }}">
+        <div class="modal-dialog top-0 !-translate-y-0 relative w-auto pointer-events-none">
+            <div class="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-clip-padding
+                    rounded-md outline-none text-current">
+                <div class="relative rounded-lg shadow dark:bg-slate-800">
+                    <div class="card">
+                        <div class="card-body flex flex-col p-6">
+                            <header class="flex mb-5 items-center border-b border-slate-100 dark:border-slate-700 pb-5 -mx-6 px-6">
+                                <div class="flex-1">
+                                    <div class="card-title text-slate-900 dark:text-white">Cài đặt Nhạc</div>
+                                </div>
+                            </header>
+                            <div class="card-text h-full space-y-4">
+                                <form class="space-y-4">
+                                    <div class="input-area relative sound_group">
+                                        <div class="flex sg_header">
+                                            <label for="largeInput" class="form-label">Đường dẫn file nhạc</label>
+                                            <iconify-icon class="text-xl ml-2" icon="ph:plus-bold"></iconify-icon>
+                                        </div>
+                                        <div class="sg_body space-y-2">
+                                            <div class="flex items-center">
+                                                <input type="text" name="gift_sound[]" class="form-control pb-2"
+                                                       placeholder="Nhập đường dẫn file nhạc (trên máy)">
+                                                <div class="remove_sound ml-2">
+                                                    <iconify-icon class="text-xl" icon="ph:minus-fill"></iconify-icon>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </form>
                                 <button class="btn inline-flex justify-center btn-primary submit">Gửi</button>

@@ -1,4 +1,5 @@
 import os.path
+import random
 from threading import Thread
 from typing import Optional
 from module.model import GiftConfig
@@ -21,14 +22,14 @@ class Controller(Thread):
             self.queue_redis['speed'] = list()
         self.current_speed: Optional[dict] = None
 
-    def next(self) -> dict:
+    def remove_top_queue(self) -> dict:
         current_queue = self.queue_redis['speed']
-        speed = current_queue.pop(0)
-        self.queue_redis['speed'] = current_queue
-        return speed
+        if current_queue:
+            speed = current_queue.pop(0)
+            self.queue_redis['speed'] = current_queue
+            return speed
 
     def set_speed(self, speed):
-        self.mixer.emit('speed', self.queue_redis["speed"])
         is_valid = False
         if "FAST" in speed['types']:
             self.mixer.set_speed(1.0 + 0.25*speed['count'])
@@ -42,11 +43,14 @@ class Controller(Thread):
         if is_valid:
             time.sleep(15)
             self.mixer.set_speed(1)
+        self.remove_top_queue()
+        self.mixer.emit('speed', self.queue_redis["speed"])
+
 
     def run(self):
         while True:
             if not self.mixer.pause and self.queue_redis['speed']:
-                self.current_speed = self.next()
+                self.current_speed = self.queue_redis['speed'][0]
                 self.set_speed(speed=self.current_speed)
             time.sleep(.1)
 
@@ -58,11 +62,13 @@ class Mixer(Thread):
 
         self.config = RedisDict(namespace='config')
         self.queue_redis = RedisDict(namespace='queue')
+        self.pk_redis = RedisDict(namespace='pk')
         if 'queue' not in self.queue_redis:
             self.queue_redis['queue'] = list()
         self.mixer = pygame.mixer
         self.mixer.init()
         self.channel_bg_music = self.mixer.Channel(0)
+        self.channel_pk_music = self.mixer.Channel(1)
         self.channel_gift_music = MediaPlayer()
         self.pause = True
         self.current_gift: Optional[dict] = None
@@ -71,6 +77,13 @@ class Mixer(Thread):
         self.update_background_music()
         self.controller = Controller(mixer=self)
         self.controller.start()
+        self.pk = False
+
+    def start_pk(self):
+        self.pk = 1
+
+    def stop_pk(self):
+        self.pk = False
 
     def ready(self):
         self.pause = False
@@ -139,11 +152,12 @@ class Mixer(Thread):
         self.queue_redis['speed'] = list()
         log.info(f'Loại toàn bộ danh sách phát ({count} bài)')
 
-    def next(self) -> dict:
+    def remove_top_queue(self) -> dict:
         current_queue = self.queue_redis['queue']
-        gift = current_queue.pop(0)
-        self.queue_redis['queue'] = current_queue
-        return gift
+        if current_queue:
+            gift = current_queue.pop(0)
+            self.queue_redis['queue'] = current_queue
+            return gift
 
     def play_and_wait(self, path):
         self.channel_gift_music.set_media(Media(path))
@@ -151,10 +165,15 @@ class Mixer(Thread):
         while self.channel_gift_music.get_state() != State(6):
             time.sleep(.5)
 
-    def play(self, gift: dict):
+    def socket_update_queue(self):
+        self.emit('pause_state', self.pause)
         self.emit('queue', self.queue_redis["queue"])
         self.emit('speed', self.queue_redis["speed"])
-        sound = gift['sound']
+
+    def play(self, gift: dict):
+        self.socket_update_queue()
+
+        sound = random.choice(gift['sound'])
         if sound:
             log.info(
                 f'Đang phát {gift["name"]}, danh sách phát {len(self.queue_redis["queue"])} bài')
@@ -164,6 +183,9 @@ class Mixer(Thread):
                     self.play_and_wait(self.config['cross_music'])
 
                 self.play_and_wait(sound)
+                self.remove_top_queue()
+
+                self.socket_update_queue()
 
                 time.sleep(self.config['play_delay'])
             except error:
@@ -175,10 +197,17 @@ class Mixer(Thread):
     def run(self):
         while True:
             if not self.pause and self.queue_redis['queue']:
-                self.current_gift = self.next()
+                self.current_gift = self.queue_redis['queue'][0]
                 self.play(gift=self.current_gift)
-                # Set current_gift to next gift to prevent reset failure
-                self.current_gift = self.queue_redis['queue'][0] if self.queue_redis['queue'] else 0
             if not self.queue_redis['queue'] and not self.pause:
                 self.channel_bg_music.unpause()
+            if self.pk:
+                sounds = self.pk_redis['sounds']
+                if self.pk > len(sounds):
+                    self.pk = 1
+                self.channel_pk_music.play(Sound(sounds[self.pk-1]), loops=0)
+                while self.channel_pk_music.get_busy():
+                    time.sleep(.5)
+                if self.pk:
+                    self.pk += 1
             time.sleep(.1)

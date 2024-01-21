@@ -14,14 +14,28 @@ $(document).ready(function () {
         check_speed(data)
     });
 
-    function render_queue(event) {
+    let pause_state = false
+    socket.on("pause_state", (r) => {
+        pause_state = r
+    });
+
+    function render_queue(event, is_set_playing) {
+        let is_playing = false
+        if (!is_set_playing) {
+            if (!pause_state) {
+                is_playing = true
+            }
+        }
         return `
-            <div class="bg-slate-800 bg-opacity-50 hover:bg-slate-700 shadow rounded-2xl p-5 cursor-pointer gift-item w-full">
+            <div class="bg-slate-800 hover:bg-slate-700 shadow rounded-2xl p-5 cursor-pointer gift-item basis-1/2">
                 <div class="flex items-center gap-6 ">
                     <img src="${event.ava}"
-                         alt="" class="h-16 rounded-full">
+                         alt="" class="h-16 rounded-full ${is_playing ? "animate-spin" : ""}">
                     <div class="w-full flex flex-row items-center align-center gap-4 text-slate-300 justify-between text-xl">
-                        <h2 class="mb-1 w-2/2 truncate">${event.user}</h2>
+                        <h2 class="mb-1 w-2/2 truncate">
+                            ${is_playing ? '<iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="svg-spinners:bars-scale-middle"></iconify-icon>' : ""}
+                            ${event.user}
+                        </h2>
                         <div class="flex items-center align-center gap-2 w-1/3 justify-end">
                             <img src="${event.thumbnail}"
                                  alt="" class="h-12 rounded-full">
@@ -45,29 +59,31 @@ $(document).ready(function () {
             
         `
         let last_event = {'id': false, 'user': false, 'count': 0}
+        let is_set_playing = false
         $.each(data, function (i, event) {
             if ((event.id === last_event.id) && (event.user === last_event.user)) {
                 last_event.count += 1
             } else {
                 if (last_event.count) {
-                    html += render_queue(last_event)
+                    html += render_queue(last_event, is_set_playing)
+                    is_set_playing = true
                 }
                 last_event = event
                 last_event.count = 1
             }
         });
-        html += render_queue(last_event)
+        html += render_queue(last_event, is_set_playing)
         $('#queue').html(html)
     }
 
-    function render_speed(event) {
+    function render_speed(event, is_set_speeding) {
         if (event.types.includes('FAST')) {
             return `
-                <span class="badge bg-success-500 text-success-500 bg-opacity-30 capitalize font-bold">Tăng Tốc x${event.count}</span>
+                <span class="badge bg-success-500 text-success-500 bg-opacity-30 capitalize font-bold">${is_set_speeding ? "": "Đang "} Tăng Tốc x${event.count}</span>
             `
         } else if (event.types.includes('SLOW')) {
             return `
-                <span class="badge bg-danger-500 text-danger-500 bg-opacity-30 capitalize font-bold">Giảm Tốc x${event.count}</span>
+                <span class="badge bg-danger-500 text-danger-500 bg-opacity-30 capitalize font-bold">${is_set_speeding ? "": "Đang "} Giảm Tốc x${event.count}</span>
             `
         }
     }
@@ -76,19 +92,22 @@ $(document).ready(function () {
         let html = `
             
         `
+        let is_set_speeding = false
         let last_event = {'id': false, 'count': 0}
         $.each(data, function (i, event) {
-            if ((event.id === last_event.id)) {
-                last_event.count += 1
-            } else {
-                if (last_event.count) {
-                    html += render_speed(last_event)
-                }
-                last_event = event
-                last_event.count = 1
-            }
+            html += function render_speed(event, is_set_speeding) {
+        if (event.types.includes('FAST')) {
+            return `
+                <span class="badge bg-success-500 text-success-500 bg-opacity-30 capitalize font-bold">${is_set_speeding ? "": "Đang "} Tăng Tốc x${event.count}</span>
+            `
+        } else if (event.types.includes('SLOW')) {
+            return `
+                <span class="badge bg-danger-500 text-danger-500 bg-opacity-30 capitalize font-bold">${is_set_speeding ? "": "Đang "} Giảm Tốc x${event.count}</span>
+            `
+        }
+    }(event, is_set_speeding)
+            is_set_speeding = true
         });
-        html += render_speed(last_event)
         $('#speed').html(html)
     }
 });

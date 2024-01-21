@@ -32,6 +32,9 @@ def prepare_redis():
         if config not in pk_redis:
             pk_redis[config] = 0
 
+    if 'sounds' not in pk_redis:
+        pk_redis['sounds'] = list()
+
     for config in ['name']:
         if config not in pk_redis:
             pk_redis[config] = ''
@@ -212,8 +215,7 @@ def delete_profile(name):
 @socketio.on('reset_queue')
 def reset_queue(name):
     app.mixer.reset_all()
-    emit('queue', app.mixer.queue_redis["queue"])
-    emit('speed', app.mixer.queue_redis["speed"])
+    app.mixer.socket_update_queue()
 
 
 @socketio.on('set_default_profile')
@@ -495,16 +497,14 @@ def pause(data):
 
 @socketio.on('queue')
 def queue(data):
-    emit('queue', app.mixer.queue_redis["queue"])
-    emit('speed', app.mixer.queue_redis["speed"])
+    app.mixer.socket_update_queue()
     return
 
 
 @socketio.on('add_queue')
 def add_queue(data):
     app.tiktok_dance.add_queue(data['gift'], data['quantity'])
-    emit('queue', app.mixer.queue_redis["queue"])
-    emit('speed', app.mixer.queue_redis["speed"])
+    app.mixer.socket_update_queue()
     return
 
 
@@ -584,6 +584,28 @@ def update_remain_time(data):
     if remain_time < 0:
         remain_time = "Kết Thúc"
     emit(event, remain_time)
+
+
+@socketio.on('update_pk_music')
+def update_pk_music(data):
+    event = 'update_pk_music'
+    global pk_redis
+    if 'sounds' not in data:
+        emit(event, {'success': False, 'msg': f"Vui lòng nhập ít nhất 1 file nhạc, hoặc bỏ qua nếu không muốn phát nhạc"})
+        return
+
+    sounds = list()
+    for s in data['sounds']:
+        if s:
+            is_valid = os.path.exists(s)
+            if not is_valid:
+                emit(event, {'success': False, 'msg': f"Link nhạc '{s}' không tồn tại"})
+                return
+            else:
+                sounds.append(s)
+
+    pk_redis['sounds'] = sounds
+    emit(event, {'success': True, 'msg': data})
 
 
 class Webapp(Thread):

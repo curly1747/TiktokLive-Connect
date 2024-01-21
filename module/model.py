@@ -22,24 +22,30 @@ class GiftConfig:
         self.user: Optional[User] = None
 
     def dict(self):
-        self.pick_sound()
         data = {
             'id': self.id,
             'name': self.name,
             'thumbnail': self.thumbnail,
             'price': self.price,
             'types': self.types,
-            'sound': self.picked_sound.path if self.picked_sound else '',
+            'sound': self.path_list(),
             'user': self.user.nickname if self.user else '',
             'ava': self.user.avatar.urls[0] if self.user else '/static/images/ava.jpg'
         }
         return data
 
+    def path_list(self):
+        sounds = []
+        for sound in self.sounds:
+            if path_exits(sound.path):
+                sounds.append(sound.path)
+        return sounds
+
     def pick_sound(self):
         if self.sounds:
             retry = 0
             while not self.picked_sound and retry <= 5:
-                picked:Sound = random.choice(self.sounds)
+                picked: Sound = random.choice(self.sounds)
                 if picked and path_exits(picked.path):
                     self.picked_sound = picked
         return self.picked_sound

@@ -26,11 +26,13 @@ class TikTokDance:
         self.mixer.channel_bg_music.pause()
         self.mixer.pause = True
         self.pk_mode = True
+        self.mixer.start_pk()
 
     def stop_pk(self):
         self.mixer.channel_bg_music.unpause()
         self.pk_mode = False
         self.mixer.emit('stop_pk', [self.pk['a_point'], self.pk['b_point']])
+        self.mixer.stop_pk()
 
     def update_gift_config(self):
         if 'profile' not in self.config or not self.config['profile']:
@@ -110,20 +112,7 @@ class TikTokDance:
         if not gift:
             return
 
-        for i in range(count):
-            if not gift.types:
-                self.mixer.add(gift)
-            if "PRIORITY" in gift.types:
-                self.mixer.add_priority(gift)
-            if "RESCUE" in gift.types:
-                self.mixer.reset()
-            if "RESET" in gift.types:
-                self.mixer.reset_all()
-        if "FAST" in gift.types or "SLOW" in gift.types:
-            self.mixer.add_speed(gift, count)
-
-        self.mixer.emit('queue', self.mixer.queue_redis["queue"])
-        self.mixer.emit('speed', self.mixer.queue_redis["speed"])
+        self.do_add_queue(gift=gift, count=count)
 
     def on_pk_gift(self, event: GiftEvent):
         count = 0
@@ -147,13 +136,32 @@ class TikTokDance:
         if valid:
             self.mixer.emit('update_pk', [self.pk['a_point'], self.pk['b_point']])
 
+    def do_add_queue(self, gift, count):
+        if not count:
+            return
+
+        for i in range(count):
+            if not gift.types:
+                self.mixer.add(gift)
+            if "PRIORITY" in gift.types:
+                self.mixer.add_priority(gift)
+            if "RESCUE" in gift.types:
+                self.mixer.reset()
+            if "RESET" in gift.types:
+                self.mixer.reset_all()
+        self.mixer.emit('queue', self.mixer.queue_redis["queue"])
+
+        if "FAST" in gift.types or "SLOW" in gift.types:
+            self.mixer.add_speed(gift, count)
+            self.mixer.emit('speed', self.mixer.queue_redis["speed"])
+
     def on_gift(self, event: GiftEvent):
         if self.pk_mode:
             if not event.gift.repeat_end:
                 self.on_pk_gift(event)
             return
 
-        count = 0
+        count = gift = 0
         if self.config['queue_type'] == "GIFT":
             if not event.gift.repeat_end:
                 count = 1
@@ -172,22 +180,8 @@ class TikTokDance:
                         gift = copy.deepcopy(gift)
                         gift.user = event.user
                         break
-
-        for i in range(count):
-            if not gift.types:
-                self.mixer.add(gift)
-            if "PRIORITY" in gift.types:
-                self.mixer.add_priority(gift)
-            if "RESCUE" in gift.types:
-                self.mixer.reset()
-            if "RESET" in gift.types:
-                self.mixer.reset_all()
-        if "FAST" in gift.types or "SLOW" in gift.types:
-            self.mixer.add_speed(gift, count)
-
         if count:
-            self.mixer.emit('queue', self.mixer.queue_redis["queue"])
-            self.mixer.emit('speed', self.mixer.queue_redis["speed"])
+            self.do_add_queue(gift=gift, count=count)
 
     def update_available_gifts(self, gifts):
         available_gifts = list()

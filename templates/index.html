@@ -19,7 +19,8 @@
          class="dark transition-all ease-in-out duration-200 flex flex-col min-h-screen items-center align-center p-8 space-y-8">
         {% if not profile %}
             <div class="w-full flex justify-center items-center">
-                <a class="py-10 h-1/2 border-dashed border-2 border-slate-500 rounded-2xl p-5 basis-1/2 cursor-pointer" href="/profile">
+                <a class="py-10 h-1/2 border-dashed border-2 border-slate-500 rounded-2xl p-5 basis-1/2 cursor-pointer"
+                   href="/profile">
                     <span class="flex flex-col items-center justify-center text-slate-500 w-full h-full font-bold text-3xl">
                         <iconify-icon class="ltr:mr-2 rtl:ml-2" icon="ph:plus-bold"></iconify-icon>
                         <span>{{ 'Thêm Profile' if not profiles else 'Chọn Profile' }}</span>
@@ -31,160 +32,163 @@
             </div>
 
         {% else %}
-        <div class="flex flex-col gap-4 w-full justify-center items-center align-center">
-            <div class="flex gap-4 w-full justify-center items-center align-center">
-                <button class="btn inline-flex justify-center btn-{{ 'danger' if not connected else 'success' }} basis-1/5"
-                        id="connect">
+            <div class="flex flex-col gap-4 w-full justify-center items-center align-center">
+                <div class="flex gap-4 w-full justify-center items-center align-center">
+                    <button class="btn inline-flex justify-center btn-{{ 'danger' if not connected else 'success' }} basis-1/5"
+                            id="connect">
                     <span class="flex items-center">
                         <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="ph:plugs-connected-bold"></iconify-icon>
                         <span>{{ 'Kết nối' if not connected else config['room_id'] }}</span>
                     </span>
-                </button>
-                <button class="btn inline-flex justify-center btn-light basis-1/5 space-x-4" id="pause" data-state="{{ pause }}" {{ 'disabled' if not connected and not pause }}>
+                    </button>
+                    <button class="btn inline-flex justify-center btn-light basis-1/5 space-x-4" id="pause"
+                            data-state="{{ pause }}" {{ 'disabled' if not connected and not pause }}>
                     <span class="flex items-center pause {{ 'hidden' if not pause }}">
                         <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="solar:pause-bold"></iconify-icon>
                         <span>Tạm Dừng</span>
                     </span>
-                    <span class="flex items-center resume {{ 'hidden' if pause }}">
+                        <span class="flex items-center resume {{ 'hidden' if pause }}">
                         <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2"
                                       icon="material-symbols:resume-rounded"></iconify-icon>
                         <span>Phát nhạc</span>
                     </span>
-                </button>
-                <a href="/profile{{ ('/' + profile) if profile }}" class="p-0 m-0 basis-1/5 space-x-4">
-                    <button class="btn inline-flex justify-center btn-{{ 'primary' if profile else 'danger' }} w-full set_default_profile">
+                    </button>
+                    <a href="/profile{{ ('/' + profile) if profile }}" class="p-0 m-0 basis-1/5 space-x-4">
+                        <button class="btn inline-flex justify-center btn-{{ 'primary' if profile else 'danger' }} w-full set_default_profile">
                         <span class="flex items-center">
                             <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2"
                                           icon="f7:person-crop-circle-fill-badge-checkmark"></iconify-icon>
                             <span>{{ profile if profile else 'Chưa chọn profile' }}</span>
                         </span>
-                    </button>
-                </a>
-                <button class="btn inline-flex justify-center btn-light basis-1/5 space-x-4" data-bs-toggle="modal"
-                        data-bs-target="#app_setting" data-profile="{{ profile }}">
+                        </button>
+                    </a>
+                    <button class="btn inline-flex justify-center btn-light basis-1/5 space-x-4" data-bs-toggle="modal"
+                            data-bs-target="#app_setting" data-profile="{{ profile }}">
                     <span class="flex items-center">
                         <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="ant-design:setting-filled"></iconify-icon>
                         <span>Cài Đặt</span>
                     </span>
-                </button>
-            </div>
-            <div class="flex gap-4 w-full justify-center items-center align-center">
-                <button class="btn inline-flex justify-center btn-light basis-1/5 space-x-4" data-bs-toggle="offcanvas" data-bs-target="#add_music" aria-controls="offcanvas">
+                    </button>
+                </div>
+                <div class="flex gap-4 w-full justify-center items-center align-center">
+                    <button class="btn inline-flex justify-center btn-light basis-1/5 space-x-4"
+                            data-bs-toggle="offcanvas" data-bs-target="#add_music" aria-controls="offcanvas">
                     <span class="flex items-center">
                         <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="mdi:music-note-add"></iconify-icon>
                         <span>Thêm nhạc</span>
                     </span>
-                </button>
-                <button class="btn inline-flex justify-center btn-danger basis-1/5 space-x-4" id="reset_queue">
+                    </button>
+                    <button class="btn inline-flex justify-center btn-danger basis-1/5 space-x-4" id="reset_queue">
                     <span class="flex items-center">
                         <iconify-icon class="text-xl ltr:mr-2 rtl:ml-2" icon="icon-park-solid:clear"></iconify-icon>
                         <span>Reset danh sách</span>
                     </span>
-                </button>
+                    </button>
+                </div>
             </div>
-        </div>
 
-        <div class="flex flex-wrap justify-center gap-6 w-full h-full" id="queue">
-        </div>
+            <div class="flex flex-wrap justify-center gap-6 w-full h-full" id="queue">
+            </div>
 
-        <!-- MODEL APP SETTING -->
-        <div class="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto"
-             id="app_setting" tabindex="-1" aria-labelledby="disabled_animation" style="display: none;"
-             aria-hidden="true">
-            <div class="modal-dialog top-0 !-translate-y-0 relative w-auto pointer-events-none">
-                <div class="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-clip-padding
+            <!-- MODEL APP SETTING -->
+            <div class="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto"
+                 id="app_setting" tabindex="-1" aria-labelledby="disabled_animation" style="display: none;"
+                 aria-hidden="true">
+                <div class="modal-dialog top-0 !-translate-y-0 relative w-auto pointer-events-none">
+                    <div class="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-clip-padding
                         rounded-md outline-none text-current">
-                    <div class="relative rounded-lg shadow dark:bg-slate-800">
-                        <div class="card">
-                            <div class="card-body flex flex-col p-6">
-                                <header class="flex mb-5 items-center border-b border-slate-100 dark:border-slate-700 pb-5 -mx-6 px-6">
-                                    <div class="flex-1">
-                                        <div class="card-title text-slate-900 dark:text-white">Cài đặt</div>
-                                    </div>
-                                </header>
-                                <div class="card-text h-full space-y-4">
-                                    <form class="space-y-4">
-                                        <div class="input-area relative">
-                                            <label for="largeInput" class="form-label">Room ID</label>
-                                            <div class="relative">
-                                                <input type="text" class="form-control !pl-12 room_id"
-                                                       placeholder="Nhập Room ID (Không nhập @)"
-                                                       value="{{ config['room_id'] }}">
-                                                <span class="absolute left-0 top-1/2 -translate-y-1/2 w-9 h-full border-r border-r-slate-200 dark:border-r-slate-700 flex items-center justify-center">
+                        <div class="relative rounded-lg shadow dark:bg-slate-800">
+                            <div class="card">
+                                <div class="card-body flex flex-col p-6">
+                                    <header class="flex mb-5 items-center border-b border-slate-100 dark:border-slate-700 pb-5 -mx-6 px-6">
+                                        <div class="flex-1">
+                                            <div class="card-title text-slate-900 dark:text-white">Cài đặt</div>
+                                        </div>
+                                    </header>
+                                    <div class="card-text h-full space-y-4">
+                                        <form class="space-y-4">
+                                            <div class="input-area relative">
+                                                <label for="largeInput" class="form-label">Room ID</label>
+                                                <div class="relative">
+                                                    <input type="text" class="form-control !pl-12 room_id"
+                                                           placeholder="Nhập Room ID (Không nhập @)"
+                                                           value="{{ config['room_id'] }}">
+                                                    <span class="absolute left-0 top-1/2 -translate-y-1/2 w-9 h-full border-r border-r-slate-200 dark:border-r-slate-700 flex items-center justify-center">
                                                 @
                                                 </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="input-area relative">
-                                            <label for="largeInput" class="form-label">Thời gian chờ chuyển bài</label>
-                                            <div class="relative">
-                                                <input type="text" class="form-control !pl-12 play_delay"
-                                                       placeholder="Nhập thời gian chờ chuyển bài"
-                                                       value="{{ config['play_delay'] }}">
-                                                <span class="absolute left-0 top-1/2 -translate-y-1/2 w-9 h-full border-r border-r-slate-200 dark:border-r-slate-700 flex items-center justify-center">
+                                            <div class="input-area relative">
+                                                <label for="largeInput" class="form-label">Thời gian chờ chuyển
+                                                    bài</label>
+                                                <div class="relative">
+                                                    <input type="text" class="form-control !pl-12 play_delay"
+                                                           placeholder="Nhập thời gian chờ chuyển bài"
+                                                           value="{{ config['play_delay'] }}">
+                                                    <span class="absolute left-0 top-1/2 -translate-y-1/2 w-9 h-full border-r border-r-slate-200 dark:border-r-slate-700 flex items-center justify-center">
                                                 s
                                                 </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="input-area relative">
-                                            <label for="largeInput" class="form-label">Thêm danh sách chờ</label>
-                                            <div class="flex gap-6">
-                                                <label class="flex items-center cursor-pointer gap-2">
-                                                    <input type="radio" class="" name="queue_type[]"
-                                                           value="GIFT" {{ 'checked' if config['queue_type'] == "GIFT" or not setting['queue_type'] }}>
-                                                    <span class="text-slate-900 font-Inter font-normal text-sm leading-6 capitalize dark:text-slate-300">Ngay lập tức</span>
-                                                </label>
-                                                <label class="flex items-center cursor-pointer gap-2">
-                                                    <input type="radio" class="" name="queue_type[]"
-                                                           value="COMBO" {{ 'checked' if config['queue_type'] == "COMBO" }}>
-                                                    <span class="text-slate-900 font-Inter font-normal text-sm leading-6 capitalize dark:text-slate-300">Hết combo</span>
-                                                </label>
+                                            <div class="input-area relative">
+                                                <label for="largeInput" class="form-label">Thêm danh sách chờ</label>
+                                                <div class="flex gap-6">
+                                                    <label class="flex items-center cursor-pointer gap-2">
+                                                        <input type="radio" class="" name="queue_type[]"
+                                                               value="GIFT" {{ 'checked' if config['queue_type'] == "GIFT" or not setting['queue_type'] }}>
+                                                        <span class="text-slate-900 font-Inter font-normal text-sm leading-6 capitalize dark:text-slate-300">Ngay lập tức</span>
+                                                    </label>
+                                                    <label class="flex items-center cursor-pointer gap-2">
+                                                        <input type="radio" class="" name="queue_type[]"
+                                                               value="COMBO" {{ 'checked' if config['queue_type'] == "COMBO" }}>
+                                                        <span class="text-slate-900 font-Inter font-normal text-sm leading-6 capitalize dark:text-slate-300">Hết combo</span>
+                                                    </label>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </form>
-                                    <button class="btn inline-flex justify-center btn-dark submit">Lưu</button>
+                                        </form>
+                                        <button class="btn inline-flex justify-center btn-dark submit">Lưu</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- OFF CANVAS ADD MUSIC -->
-        <div class="offcanvas offcanvas-end !m-0 fixed bottom-0 flex flex-col max-w-full bg-white dark:bg-slate-800 invisible bg-clip-padding shadow-sm outline-none transition duration-300 ease-in-out text-gray-700 top-0 ltr:right-0 rtl:left-0 border-none w-96"
-             tabindex="-1" id="add_music" aria-labelledby="offcanvas">
-            <div class="offcanvas-header flex items-center justify-between p-4 pt-3 border-b border-b-slate-300">
-                <div>
-                    <h3 class="block text-xl font-Inter text-slate-900 font-medium dark:text-[#eee]">
-                        Thêm nhạc vào danh sách phát
-                    </h3>
+            <!-- OFF CANVAS ADD MUSIC -->
+            <div class="offcanvas offcanvas-end !m-0 fixed bottom-0 flex flex-col max-w-full bg-white dark:bg-slate-800 invisible bg-clip-padding shadow-sm outline-none transition duration-300 ease-in-out text-gray-700 top-0 ltr:right-0 rtl:left-0 border-none w-96"
+                 tabindex="-1" id="add_music" aria-labelledby="offcanvas">
+                <div class="offcanvas-header flex items-center justify-between p-4 pt-3 border-b border-b-slate-300">
+                    <div>
+                        <h3 class="block text-xl font-Inter text-slate-900 font-medium dark:text-[#eee]">
+                            Thêm nhạc vào danh sách phát
+                        </h3>
+                    </div>
+                    <button type="button"
+                            class="box-content text-2xl w-4 h-4 p-2 pt-0 -my-5 -mr-2 text-black dark:text-white border-none rounded-none opacity-100 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-black hover:opacity-75 hover:no-underline"
+                            data-bs-dismiss="offcanvas">
+                        <iconify-icon icon="line-md:close"></iconify-icon>
+                    </button>
                 </div>
-                <button type="button"
-                        class="box-content text-2xl w-4 h-4 p-2 pt-0 -my-5 -mr-2 text-black dark:text-white border-none rounded-none opacity-100 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-black hover:opacity-75 hover:no-underline"
-                        data-bs-dismiss="offcanvas">
-                    <iconify-icon icon="line-md:close"></iconify-icon>
-                </button>
-            </div>
-            <div class="offcanvas-body flex-grow overflow-y-auto">
-                <div class="settings-modal text-base text-slate-300 p-4 gap-4 flex flex-col">
-                    {% for gift in gift_config %}
-                        <div class="flex items-center gap-2" data-id="{{ gift.id }}">
-                            <div class="basis-1/6">
-                                <img src="{{ gift.thumbnail }}" alt="" class="h-10 rounded-full">
+                <div class="offcanvas-body flex-grow overflow-y-auto">
+                    <div class="settings-modal text-base text-slate-300 p-4 gap-4 flex flex-col">
+                        {% for gift in gift_config %}
+                            <div class="flex items-center gap-2" data-id="{{ gift.id }}">
+                                <div class="basis-1/6">
+                                    <img src="{{ gift.thumbnail }}" alt="" class="h-10 rounded-full">
+                                </div>
+                                <label class="basis-3/5">{{ gift.name }}</label>
+                                <input type="text" class="form-control quantity basis-1/6" value="1">
+                                <button class="btn inline-flex justify-center btn-dark submit basis-1/6 px-0">
+                                    <iconify-icon icon="mdi:music-note-add"></iconify-icon>
+                                </button>
                             </div>
-                            <label class="basis-3/5">{{ gift.name }}</label>
-                            <input type="text" class="form-control quantity basis-1/6" value="1">
-                            <button class="btn inline-flex justify-center btn-dark submit basis-1/6 px-0">
-                                <iconify-icon icon="mdi:music-note-add"></iconify-icon>
-                            </button>
-                        </div>
-                        <div class="hr !m-0"></div>
-                    {% endfor %}
+                            <div class="hr !m-0"></div>
+                        {% endfor %}
 
+                    </div>
                 </div>
             </div>
-        </div>
 
         {% endif %}
     </div>

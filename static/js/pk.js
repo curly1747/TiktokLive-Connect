@@ -239,15 +239,13 @@ $(document).ready(function () {
         ts.clear()
     });
 
-
-    const modal_config = $("#config")
-
     $("#config_button").click(function () {
         $.each(modal_config.find('select'), function (i, e) {
             e.tomselect.setValue($(e).data('json'))
         })
     })
 
+    const modal_config = $("#config")
     modal_config.find('button.submit').click(function () {
         $(this).html(render_loading())
         $(this).prop('disabled', true)
@@ -280,9 +278,9 @@ $(document).ready(function () {
     });
 
     socket.on("connect", () => {
-        setInterval(function (){
+        setInterval(function () {
             socket.emit('update_remain_time', '');
-        }, 5*1000)
+        }, 5 * 1000)
     });
 
     const remain_time_label = $("#remain_time_label")
@@ -301,8 +299,8 @@ $(document).ready(function () {
         socket.emit('start_pk', '');
     })
 
-    function new_pk(){
-        $.each(['a', 'b'], function (i, team){
+    function new_pk() {
+        $.each(['a', 'b'], function (i, team) {
             let team_e = $("#name_" + team)
             team_e.find('.win').addClass('hidden')
             team_e.find('.lose').addClass('hidden')
@@ -356,4 +354,60 @@ $(document).ready(function () {
         start_btn.toggleClass('btn-primary btn-success')
     });
 
+    function render_sound_input(val = '') {
+        return `
+            <div class="flex items-center">
+                <input type="text" name="gift_sound[]" class="form-control pb-2" placeholder="Nhập đường dẫn file nhạc (trên máy)" value="${val}">
+                <div class="remove_sound ml-2">
+                    <iconify-icon class="text-xl" icon="ph:minus-fill"></iconify-icon>
+                </div>
+            </div>
+        `
+    }
+
+
+    const modal_music_config = $("#music_config")
+
+    $('.sound_group .sg_header').on("click", function () {
+        const e = render_sound_input()
+        $('.sound_group .sg_body').append(e)
+        $('.remove_sound').on("click", function () {
+            $(this).parent().remove()
+        })
+    })
+
+    let sounds = modal_music_config.data('sounds')
+
+    if (sounds.constructor !== Array){
+        sounds = JSON.parse(sounds.replaceAll("'", '"'))
+    }
+    console.log(sounds)
+    if (sounds.length) {
+        modal_music_config.find('.sound_group .sg_body').html("")
+        $.each(sounds, function (index, path) {
+            const e = render_sound_input(path)
+            modal_music_config.find('.sound_group .sg_body').append(e)
+            $('.remove_sound').on("click", function () {
+            $(this).parent().remove()
+        })
+        });
+    }
+
+
+    modal_music_config.find('button.submit').click(function () {
+        $(this).html(render_loading())
+        $(this).prop('disabled', true)
+        let sounds = $('input[name="gift_sound[]"]').map(function () {
+            return $(this).val()
+        }).get();
+        const data = {
+            'sounds': sounds,
+        }
+        socket.emit('update_pk_music', data);
+    })
+
+    socket.on("update_pk_music", (r) => {
+        const button = modal_music_config.find("button.submit")
+        socket_verify(r, button)
+    });
 });
