@@ -35,7 +35,7 @@ class Controller(Thread):
             is_valid = True
         elif "SLOW" in speed['types']:
             rate = 1
-            for i in speed['count']:
+            for i in range(speed['count']):
                 rate = rate * 0.75
             self.mixer.set_speed(rate)
             is_valid = True
