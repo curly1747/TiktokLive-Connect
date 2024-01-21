@@ -31,7 +31,7 @@ class Controller(Thread):
         self.mixer.emit('speed', self.queue_redis["speed"])
         is_valid = False
         if "FAST" in speed['types']:
-            self.mixer.set_speed(1.0 + 1.0*speed['count'])
+            self.mixer.set_speed(1.0 + 0.25*speed['count'])
             is_valid = True
         elif "SLOW" in speed['types']:
             self.mixer.set_speed(0.5*speed['count'])
