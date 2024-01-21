@@ -7,7 +7,7 @@ $(document).ready(function () {
     });
 
     socket.on("queue", (data) => {
-        data.length ? check_queue(data) : ''
+        data.length ? check_queue(data) : $("#queue").html("")
     });
 
     socket.on("speed", (data) => {
@@ -16,7 +16,7 @@ $(document).ready(function () {
 
     function render_queue(event) {
         return `
-            <div class="bg-slate-800 hover:bg-slate-700 shadow rounded-2xl p-5 cursor-pointer gift-item w-full">
+            <div class="bg-slate-800 bg-opacity-50 hover:bg-slate-700 shadow rounded-2xl p-5 cursor-pointer gift-item w-full">
                 <div class="flex items-center gap-6 ">
                     <img src="${event.ava}"
                          alt="" class="h-16 rounded-full">

@@ -1257,6 +1257,10 @@ video {
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
+.bg-opacity-25 {
+  --tw-bg-opacity: 0.25;
+}
+
 .bg-opacity-30 {
   --tw-bg-opacity: 0.3;
 }
@@ -1267,10 +1271,6 @@ video {
 
 .bg-opacity-\[66\%\] {
   --tw-bg-opacity: 66%;
-}
-
-.bg-opacity-0 {
-  --tw-bg-opacity: 0;
 }
 
 .bg-\[url\(\'static\/image\/icon\/avatar-placeholder\.svg\'\)\] {
