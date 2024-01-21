@@ -54,7 +54,7 @@ $(document).ready(function () {
     });
 
     socket.on("queue", (data) => {
-        data.length ? check_queue(data) : ''
+        data.length ? check_queue(data) : $("#queue").html("")
     });
 
     socket.on("speed", (data) => {
