@@ -2,7 +2,7 @@ import copy
 import logging
 from module.model import GiftConfig, Sound
 from redis_dict import RedisDict
-from TikTokLive.types.events import GiftEvent
+from TikTokLive.events.proto_events import GiftEvent
 from typing import Optional
 from module.mixer import Mixer
 from module.log import get_logger
@@ -115,23 +115,23 @@ class TikTokDance:
         self.do_add_queue(gift=gift, count=count)
 
     def on_pk_gift(self, event: GiftEvent):
-        count = 0
-        log.debug(f'User {event.user.nickname} sent {count}x {event.gift.info.name}. {event.gift}')
+        event_log = ('streakable', event.gift.streakable, 'streaking', event.streaking, 'repeat_end', event.repeat_end,
+                     'repeat_count', event.repeat_count)
+        log.debug(f'User {event.user.nickname} sent {event.gift.name}. {event_log}')
         for gift in self.gifts:
             if event.gift.id == gift.id:
-                count = event.gift.count
                 gift = copy.deepcopy(gift)
                 gift.user = event.user
                 break
 
         valid = False
-        for i in range(count):
-            for team in ['a', 'b']:
-                for id in self.pk[team]['gifts']:
-                    if gift.id == id:
-                        self.pk[f'{team}_point'] = self.pk[f'{team}_point'] + gift.price
-                        self.mixer.emit('update_pk', [self.pk['a_point'], self.pk['b_point']])
-                        valid = True
+        for team in ['a', 'b']:
+            for id in self.pk[team]['gifts']:
+                if gift.id == id:
+                    self.pk[f'{team}_point'] = self.pk[f'{team}_point'] + gift.price
+                    log.debug(self.pk)
+                    self.mixer.emit('update_pk', [self.pk['a_point'], self.pk['b_point']])
+                    valid = True
 
         if valid:
             self.mixer.emit('update_pk', [self.pk['a_point'], self.pk['b_point']])
@@ -157,26 +157,29 @@ class TikTokDance:
 
     def on_gift(self, event: GiftEvent):
         if self.pk_mode:
-            if not event.gift.repeat_end:
+            if not event.repeat_end:
                 self.on_pk_gift(event)
             return
 
+        event_log = ('streakable', event.gift.streakable, 'streaking', event.streaking, 'repeat_end', event.repeat_end,
+                     'repeat_count', event.repeat_count)
+
         count = gift = 0
         if self.config['queue_type'] == "GIFT":
-            if not event.gift.repeat_end:
+            if not event.repeat_end:
                 count = 1
-                log.debug(f'User {event.user.nickname} sent {event.gift.info.name}. {event.gift}')
+                log.debug(f'User {event.user.nickname} sent {event.gift.name}. {event_log}')
                 for gift in self.gifts:
                     if event.gift.id == gift.id:
                         gift = copy.deepcopy(gift)
                         gift.user = event.user
                         break
         else:
-            if event.gift.repeat_end:
-                log.debug(f'User {event.user.nickname} sent {event.gift.count}x {event.gift.info.name}. {event.gift}')
+            if event.repeat_end:
+                log.debug(f'User {event.user.nickname} sent {event.repeat_count}x {event.gift.name}. {event_log}')
                 for gift in self.gifts:
                     if event.gift.id == gift.id:
-                        count = event.gift.count
+                        count = event.repeat_count
                         gift = copy.deepcopy(gift)
                         gift.user = event.user
                         break
@@ -185,8 +188,8 @@ class TikTokDance:
 
     def update_available_gifts(self, gifts):
         available_gifts = list()
-        for i in gifts:
-            gift = gifts[i]
-            data = {'id': gift.id, 'price': gift.diamond_count, 'name': gift.name, 'thumbnail': gift.icon.urls[0]}
+        gifts = gifts['gifts']
+        for gift in gifts:
+            data = {'id': gift['id'], 'price': gift['diamond_count'], 'name': gift['name'], 'thumbnail': gift['icon']['url_list'][0]}
             available_gifts.append(data)
         self.config['available_gifts'] = available_gifts

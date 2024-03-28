@@ -1,7 +1,8 @@
 from typing import Optional
 import random
 from os.path import exists as path_exits
-from TikTokLive.types.objects import User
+# from TikTokLive.types.objects import User
+from TikTokLive.proto.custom_proto import ExtendedUser as User
 
 
 class Sound:
@@ -30,7 +31,7 @@ class GiftConfig:
             'types': self.types,
             'sound': self.path_list(),
             'user': self.user.nickname if self.user else '',
-            'ava': self.user.avatar.urls[0] if self.user else '/static/images/ava.jpg'
+            'ava': self.user.avatar_thumb.url_list[0] if self.user else '/static/images/ava.jpg'
         }
         return data
 
